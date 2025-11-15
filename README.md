@@ -1,34 +1,99 @@
-# vcr-react-express-monorepo-template
+# VCR React Express Monorepo Template
 
-## Debug or Deploy VCR App
+A full-stack monorepo template with ReactJS frontend and ExpressJS backend, designed for deployment on Vonage Cloud Runtime (VCR).
 
-The ReactJS `/frontend` folder and ExpressJS `/backend` folder should be run separately. They each have their own `vcr.yml` file that needs to be configured.
+## Overview
 
-Requires VCR (Vonage Cloud Runtime) CLI.
-Requires `npm install` in both folders (frontend and backend)
+This monorepo contains two separate applications:
 
-You should run `vcr init` in both folders (frontend and backend). This will allow you use the VCR CLI to create VCR configured Vonage Applications and help generate Application IDs that generate `vcr.yml` files. You can then use the examples as reference: `vcr-frontend-sample.yml` and `vcr-backend-sample.yml`.
+- **Frontend** (`/frontend`): ReactJS application created with Create React App
+- **Backend** (`/backend`): ExpressJS API server
 
-To run Locally (vcr debug):
+Each application has its own `vcr.yml` configuration file and must be run and deployed independently.
 
-1. Run the Backend: In another terminal, `cd backend` and `vcr debug -y`
-2. Run the Frontend: In terminal, `cd frontend` and `npm start`
+## Prerequisites
 
-To deploy (vcr deploy):
+- [VCR (Vonage Cloud Runtime) CLI](https://developer.vonage.com/en/vcr)
+- Node.js and npm
+- Two VCR Application IDs (one for frontend, one for backend)
 
-1. Deploy the Backend: `cd backend` and then `vcr deploy`
+## Setup
 
-2. Deploy the Frontend:
-   1. Update in /frontend/src/App.js `BACKEND_URL` to your VCR Backend URL.
-   2. Update in /backend/vcr.yml `FRONTEND_URL` to your VCR Frontend URL. You can deploy frontend twice to retrieve it. There's probably a smarter way to do this.
-   3. Then `cd frontend` and `vcr deploy`
+1. **Install dependencies** in both directories:
 
-## Work History
+   ```bash
+   cd frontend && npm install
+   cd ../backend && npm install
+   ```
 
-1. Requires 2 VCR application ID's first for frontend and second for backend.
-2. Created two directories: `backend` and `frontend`.
-3. In the `frontend` directory:
-   - Ran `npx create-react-app .` to create a new ReactJS project in the empty directory.
-   - Ran `vcr init` and created a new app named `vcr-react-frontend`.
-4. In the `backend` directory:
-   - Ran `vcr init` and created a new app named `vcr-react-backend`.
+2. **Initialize VCR applications** in both directories:
+
+   ```bash
+   # In frontend directory
+   cd frontend
+   vcr init
+
+   # In backend directory
+   cd backend
+   vcr init
+   ```
+
+3. **Configure VCR files** using the provided samples as reference:
+   - `vcr-frontend-sample.yml`
+   - `vcr-backend-sample.yml`
+
+## Local Development
+
+Run both applications in separate terminal windows:
+
+**Terminal 1 - Backend:**
+
+```bash
+cd backend
+vcr debug -y
+```
+
+**Terminal 2 - Frontend:**
+
+```bash
+cd frontend
+npm start
+```
+
+## Deployment
+
+### 1. Deploy Backend
+
+```bash
+cd backend
+vcr deploy
+```
+
+Note the deployed backend URL.
+
+### 2. Deploy Frontend
+
+1. Update `BACKEND_URL` in `/frontend/src/App.js` with your deployed backend URL
+2. Update `FRONTEND_URL` in `/backend/vcr.yml` with your frontend URL (you may need to deploy twice to get the URL)
+3. Deploy:
+
+   ```bash
+   cd frontend
+   vcr deploy
+   ```
+
+## Project Structure
+
+```text
+.
+├── backend/
+│   ├── index.js              # Express server entry point
+│   ├── vcr.yml               # Backend VCR configuration
+│   └── package.json
+├── frontend/
+│   ├── src/
+│   │   └── App.js            # React application
+│   ├── vcr.yml               # Frontend VCR configuration
+│   └── package.json
+└── README.md
+```

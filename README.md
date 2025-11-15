@@ -4,7 +4,9 @@
 
 The ReactJS `/frontend` folder and ExpressJS `/backend` folder should be run separately. They each have their own `vcr.yml` file that needs to be configured.
 
-You should run `vcr init` in both folders. This will allow you to create Vonage Applications and help generate Application IDs that generate `vcr.yml` files. You can then use the examples as reference: `vcr-frontend-sample.yml` and `vcr-backend-sample.yml`.
+Requires VCR (Vonage Cloud Runtime) CLI.
+
+You should run `vcr init` in both folders (frontend and backend). This will allow you use the VCR CLI to create VCR configured Vonage Applications and help generate Application IDs that generate `vcr.yml` files. You can then use the examples as reference: `vcr-frontend-sample.yml` and `vcr-backend-sample.yml`.
 
 To run Locally (vcr debug):
 
@@ -29,4 +31,3 @@ To deploy (vcr deploy):
    - Ran `vcr init` and created a new app named `vcr-react-frontend`.
 4. In the `backend` directory:
    - Ran `vcr init` and created a new app named `vcr-react-backend`.
-   - Chose "Starter App" as the VCR application template.

@@ -1,6 +1,15 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Container, Typography, Button, Box, Paper } from "@mui/material";
+import {
+  Container,
+  Typography,
+  Button,
+  Box,
+  Paper,
+  Collapse,
+  IconButton,
+} from "@mui/material";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import "./App.css";
 
 const BACKEND_URL =
@@ -11,6 +20,7 @@ const BACKEND_URL =
 function App() {
   const [responses, setResponses] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [expandedOlder, setExpandedOlder] = useState({});
 
   const handleGetFirst = async () => {
     setLoading(true);
@@ -18,6 +28,7 @@ function App() {
       const result = await axios.get(`${BACKEND_URL}/api/first`);
       setResponses((prev) => [
         {
+          id: Date.now(),
           endpoint: "First",
           timestamp: new Date().toLocaleString(),
           data: result.data,
@@ -27,6 +38,7 @@ function App() {
     } catch (error) {
       setResponses((prev) => [
         {
+          id: Date.now(),
           endpoint: "First",
           timestamp: new Date().toLocaleString(),
           error: error.message,
@@ -44,6 +56,7 @@ function App() {
       const result = await axios.get(`${BACKEND_URL}/api/second`);
       setResponses((prev) => [
         {
+          id: Date.now(),
           endpoint: "Second",
           timestamp: new Date().toLocaleString(),
           data: result.data,
@@ -53,6 +66,7 @@ function App() {
     } catch (error) {
       setResponses((prev) => [
         {
+          id: Date.now(),
           endpoint: "Second",
           timestamp: new Date().toLocaleString(),
           error: error.message,
@@ -63,6 +77,16 @@ function App() {
       setLoading(false);
     }
   };
+
+  const toggleOlderResponse = (id) => {
+    setExpandedOlder((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  const recentResponses = responses.slice(0, 2);
+  const olderResponses = responses.slice(2);
 
   return (
     <Container maxWidth="md" sx={{ mt: 4 }}>
@@ -95,9 +119,11 @@ function App() {
               <Typography variant="h6" gutterBottom>
                 Responses:
               </Typography>
-              {responses.map((response, index) => (
+
+              {/* Recent responses (last 2) - always expanded */}
+              {recentResponses.map((response) => (
                 <Paper
-                  key={index}
+                  key={response.id}
                   elevation={1}
                   sx={{
                     p: 2,
@@ -121,6 +147,72 @@ function App() {
                   </pre>
                 </Paper>
               ))}
+
+              {/* Older responses - collapsed by default */}
+              {olderResponses.length > 0 && (
+                <Box sx={{ mt: 2 }}>
+                  <Paper
+                    elevation={1}
+                    sx={{ p: 2, mb: 1, backgroundColor: "#f5f5f5" }}
+                  >
+                    <Typography variant="subtitle2" color="text.secondary">
+                      Older Responses ({olderResponses.length})
+                    </Typography>
+                  </Paper>
+                  {olderResponses.map((response) => (
+                    <Paper
+                      key={response.id}
+                      elevation={1}
+                      sx={{
+                        mb: 1,
+                        backgroundColor: response.error ? "#ffebee" : "#e8f5e9",
+                        opacity: 0.9,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          p: 2,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          cursor: "pointer",
+                        }}
+                        onClick={() => toggleOlderResponse(response.id)}
+                      >
+                        <Typography variant="subtitle2" color="primary">
+                          {response.endpoint} - {response.timestamp}
+                        </Typography>
+                        <IconButton
+                          size="small"
+                          sx={{
+                            transform: expandedOlder[response.id]
+                              ? "rotate(180deg)"
+                              : "rotate(0deg)",
+                            transition: "transform 0.3s",
+                          }}
+                        >
+                          <ExpandMoreIcon />
+                        </IconButton>
+                      </Box>
+                      <Collapse in={expandedOlder[response.id]}>
+                        <Box sx={{ px: 2, pb: 2 }}>
+                          <pre
+                            style={{
+                              overflow: "auto",
+                              margin: 0,
+                              fontSize: "0.875rem",
+                            }}
+                          >
+                            {response.error
+                              ? `Error: ${response.error}`
+                              : JSON.stringify(response.data, null, 2)}
+                          </pre>
+                        </Box>
+                      </Collapse>
+                    </Paper>
+                  ))}
+                </Box>
+              )}
             </Box>
           )}
         </Box>

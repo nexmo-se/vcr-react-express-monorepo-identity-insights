@@ -337,11 +337,12 @@ Without a Network Application, these insights will return `UNAUTHORIZED` status.
 
 ## Testing
 
-### Test Phone Number
+### Test Phone Numbers
 
 Use Vonage Long Virtual Numbers (LVN) for testing:
 
 - Example: `+12089908002` (US, Idaho)
+- Use international E.164 format: +[country code][number]
 
 **Expected Results:**
 
@@ -349,6 +350,30 @@ Use Vonage Long Virtual Numbers (LVN) for testing:
 - ✅ Original carrier: Verizon Wireless
 - ⚠️ Current carrier: NOT_FOUND (expected for LVN)
 - ⚠️ SIM swap/Roaming/Reachability: UNAUTHORIZED (requires Network Application)
+
+### Testing Recommendations
+
+**Basic Testing (Without Network Application):**
+- Test format validation with various phone numbers
+- Verify original carrier lookup works
+- Test configurable SIM swap period (1-2400 hours)
+- Try location verification coordinates (will return UNAUTHORIZED but validates input)
+- Test subscriber match fields (will return UNAUTHORIZED but validates input)
+
+**Advanced Testing (With Network Application):**
+- Test SIM swap detection with real mobile numbers
+- Verify location-based device verification
+- Test subscriber KYC matching with operator records
+- Check roaming and reachability status
+
+## Security Considerations
+
+- **API Credentials**: Stored as environment variables via VCR (never in code)
+- **CORS Configuration**: Backend configured to accept requests only from specified frontend URL
+- **JWT Tokens**: Generated server-side with RS256 algorithm, short-lived (1 hour expiry)
+- **Input Validation**: All endpoints validate required fields and data types
+- **Error Handling**: Error messages sanitized before sending to client
+- **No Client-Side Secrets**: Private keys and secrets never exposed to frontend
 
 ## Resources
 

@@ -111,6 +111,7 @@ Test phone number verification with optional email and name matching:
 - **Name** (optional): Full name to match against phone number
 
 **Returns:**
+
 - Match score (0-100) based on available insights
 - Format validation (country, location, time zones)
 - SIM swap status (if authorized)
@@ -125,6 +126,7 @@ Get comprehensive information about any phone number:
 - **Phone Number** (required): Enter with country code
 
 **Returns:**
+
 - Format validation and international/national formatting
 - Country and regional information
 - Carrier/network details (current and original)
@@ -271,6 +273,7 @@ Without a Network Application, these insights will return `UNAUTHORIZED` status.
 - Identity Insights API endpoint: `https://api-eu.vonage.com/v0.1/identity-insights`
 
 **Key Features:**
+
 - Automatic credential detection from VCR environment variables
 - Comprehensive error handling with detailed status messages
 - Match score calculation based on multiple data points
@@ -289,9 +292,11 @@ Without a Network Application, these insights will return `UNAUTHORIZED` status.
 ### Test Phone Number
 
 Use Vonage Long Virtual Numbers (LVN) for testing:
+
 - Example: `+12089908002` (US, Idaho)
 
 **Expected Results:**
+
 - ✅ Format validation: OK
 - ✅ Original carrier: Verizon Wireless
 - ⚠️ Current carrier: NOT_FOUND (expected for LVN)

@@ -54,7 +54,7 @@ Each application has its own `vcr.yml` configuration file and must be run and de
    ```
 
 3. **Configure VCR files** using the provided samples as reference:
-   - Copy `vcr-frontend-sample.yml` to `vcr.yml` in the frontend directory
+   - Copy `vcr-frontend-sample.yml` to `vcr-frontend.yml` in the frontend directory
    - Copy `vcr-backend-sample.yml` to `vcr-backend.yml` in the backend directory
    - Update the `application-id` in both files with your VCR Application ID
    - VCR automatically provides these environment variables when running:
@@ -85,6 +85,124 @@ npm start
 
 The frontend will run on `http://localhost:3002`
 
+## Demo Instructions
+
+### Quick Demo Walkthrough
+
+Once both backend and frontend are running locally, follow these steps to demonstrate all features:
+
+#### 1. Basic Phone Number Verification
+
+**Test with a Vonage LVN number:**
+
+1. Open the frontend at `http://localhost:3002`
+2. In the "Identity Insights - Phone Match" section, enter:
+   - **Phone Number**: `+12089908002`
+3. Click **"Get Identity Insights"**
+
+**Expected Results:**
+- ✅ Format validation shows US/Idaho location
+- ✅ Original carrier identified (Verizon Wireless)
+- ⚠️ SIM swap/Roaming/Reachability show UNAUTHORIZED (requires Network Application)
+
+#### 2. Test with Email/Name Matching
+
+1. Enter the same phone number: `+12089908002`
+2. Add optional fields:
+   - **Email**: `test@example.com`
+   - **Name**: `John Doe`
+3. Click **"Get Identity Insights"**
+
+**Results:** Same insights plus subscriber match attempts (will show UNAUTHORIZED without Network Application)
+
+#### 3. Configure SIM Swap Period
+
+1. Enter phone number: `+12089908002`
+2. Change **SIM Swap Period** to `720` (30 days)
+3. Click **"Get Identity Insights"**
+
+**Results:** Backend will request SIM swap check for 720 hours instead of default 240
+
+#### 4. Test Location Verification (Advanced)
+
+1. Enter phone number: `+12089908002`
+2. Click to expand **"Location Verification (Optional)"** accordion
+3. Enter coordinates:
+   - **Latitude**: `40.7128` (New York City)
+   - **Longitude**: `-74.0060`
+   - **Radius**: `50000` (50km)
+4. Click **"Get Identity Insights"**
+
+**Results:** Response includes `locationVerification` with UNAUTHORIZED status (requires Network Application to work)
+
+#### 5. Test Subscriber Match KYC Fields (Advanced)
+
+1. Enter phone number: `+12089908002`
+2. Click to expand **"Subscriber Match - Detailed KYC (Optional)"** accordion
+3. Fill in sample data:
+   - **ID Document**: `123456789`
+   - **Given Name**: `John`
+   - **Family Name**: `Doe`
+   - **Street Name**: `Main Street`
+   - **Street Number**: `123`
+   - **Postal Code**: `12345`
+   - **Locality**: `New York`
+   - **Region**: `NY`
+   - **Country**: `US`
+   - **Birthdate**: `1990-01-01`
+4. Click **"Get Identity Insights"**
+
+**Results:** Response includes `subscriberMatch` with detailed match results (UNAUTHORIZED without Network Application)
+
+#### 6. Test Legacy Number Insight API
+
+1. Scroll down to **"Number Insight API (Legacy)"** section
+2. Enter phone number: `+12089908002`
+3. Click **"Verify Number"**
+
+**Results:** Basic number information using the older Number Insight Standard API
+
+### Demo Scenarios
+
+#### Scenario 1: Fraud Prevention
+**Use Case:** Detect potential account takeover during login
+
+1. Enter user's phone number
+2. Set SIM Swap Period to `168` (7 days)
+3. Check if SIM was recently swapped
+4. **Action:** If swapped recently, trigger additional verification
+
+#### Scenario 2: Identity Verification
+**Use Case:** Verify user identity during registration
+
+1. Enter phone number, email, and full name
+2. Expand Subscriber Match section
+3. Enter all available KYC data
+4. **Action:** Use match scores to determine if identity is verified
+
+#### Scenario 3: Location-Based Security
+**Use Case:** Verify user is in expected location
+
+1. Enter phone number
+2. Expand Location Verification
+3. Enter expected coordinates and radius
+4. **Action:** Confirm device is within acceptable range
+
+### Response Indicators
+
+The UI shows responses with color coding:
+- 🟢 **Green background**: Successful API response
+- 🔴 **Red background**: Error occurred
+- **Recent Responses**: Last 2 responses shown expanded
+- **Older Responses**: Collapsed by default, click to expand
+
+### Testing Different Phone Numbers
+
+Try various number formats to test format validation:
+- **US**: `+12089908002` or `12089908002`
+- **UK**: `+447700900123`
+- **International**: Include country code for accurate results
+
 ## Deployment
 
 ### 1. Deploy Backend
@@ -104,7 +222,7 @@ Note the deployed backend URL.
 
    ```bash
    cd frontend
-   vcr deploy -f ./vcr.yml
+   vcr deploy -f ./vcr-frontend.yml
    ```
 
 ## Features
@@ -294,8 +412,7 @@ Without a Network Application, these insights will return `UNAUTHORIZED` status.
 ```text
 .
 ├── backend/
-│   ├── index.js                    # Express server with Identity Insights integration
-│   ├── vcr-backend.yml            # Backend VCR configuration
+│   ├── index.js                   # Express server with Identity Insights integration
 │   ├── vcr-backend-sample.yml     # Sample configuration file
 │   └── package.json
 ├── frontend/
@@ -305,35 +422,10 @@ Without a Network Application, these insights will return `UNAUTHORIZED` status.
 │   │   └── index.js
 │   ├── public/
 │   │   └── index.html
-│   ├── vcr.yml                    # Frontend VCR configuration
 │   ├── vcr-frontend-sample.yml    # Sample configuration file
 │   └── package.json
 └── README.md
 ```
-
-## Technical Implementation
-
-### Backend (Express.js)
-
-- Uses `@vonage/server-sdk` and `@vonage/auth` for Vonage API integration
-- JWT token generation using `jsonwebtoken` library with RS256 algorithm
-- CORS enabled for local development
-- Identity Insights API endpoint: `https://api-eu.vonage.com/v0.1/identity-insights`
-
-**Key Features:**
-
-- Automatic credential detection from VCR environment variables
-- Comprehensive error handling with detailed status messages
-- Match score calculation based on multiple data points
-- Structured response formatting for all insights
-
-### Frontend (React + Material-UI)
-
-- Material-UI v7 for modern, responsive interface
-- Axios for HTTP requests
-- Real-time response display with expandable history
-- Color-coded status indicators (green for success, red for errors)
-- Form validation and user-friendly error messages
 
 ## Testing
 
@@ -368,15 +460,6 @@ Use Vonage Long Virtual Numbers (LVN) for testing:
 - Test subscriber KYC matching with operator records
 - Check roaming and reachability status
 
-## Security Considerations
-
-- **API Credentials**: Stored as environment variables via VCR (never in code)
-- **CORS Configuration**: Backend configured to accept requests only from specified frontend URL
-- **JWT Tokens**: Generated server-side with RS256 algorithm, short-lived (1 hour expiry)
-- **Input Validation**: All endpoints validate required fields and data types
-- **Error Handling**: Error messages sanitized before sending to client
-- **No Client-Side Secrets**: Private keys and secrets never exposed to frontend
-
 ## Resources
 
 ### Vonage Identity Insights Documentation
@@ -390,14 +473,6 @@ Use Vonage Long Virtual Numbers (LVN) for testing:
 - [VCR Documentation](https://developer.vonage.com/en/vcr) - Vonage Cloud Runtime setup and deployment guide
 - [Vonage Dashboard](https://dashboard.nexmo.com/) - Create applications and manage credentials
 - [JWT Authentication Guide](https://developer.vonage.com/en/getting-started/concepts/authentication#json-web-tokens-jwt) - Understanding JWT tokens for API authentication
-
-## Support
-
-For issues or questions:
-
-- Check the [API Reference](https://developer.vonage.com/en/api/identity-insights) for detailed parameter information
-- Review the [Use Cases Guide](https://developer.vonage.com/en/identity-insights/use-cases-guide) for implementation patterns
-- Visit [Vonage Developer Portal](https://developer.vonage.com/) for comprehensive documentation
 
 ## License
 

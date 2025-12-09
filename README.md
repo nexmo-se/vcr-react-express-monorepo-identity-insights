@@ -354,6 +354,7 @@ Use Vonage Long Virtual Numbers (LVN) for testing:
 ### Testing Recommendations
 
 **Basic Testing (Without Network Application):**
+
 - Test format validation with various phone numbers
 - Verify original carrier lookup works
 - Test configurable SIM swap period (1-2400 hours)
@@ -361,6 +362,7 @@ Use Vonage Long Virtual Numbers (LVN) for testing:
 - Test subscriber match fields (will return UNAUTHORIZED but validates input)
 
 **Advanced Testing (With Network Application):**
+
 - Test SIM swap detection with real mobile numbers
 - Verify location-based device verification
 - Test subscriber KYC matching with operator records

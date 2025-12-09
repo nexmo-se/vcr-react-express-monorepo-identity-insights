@@ -1,6 +1,6 @@
-# VCR React Express Monorepo Template
+# VCR React Express Monorepo Vonage Identity Insights API
 
-A full-stack monorepo template with ReactJS frontend and ExpressJS backend, designed for deployment on Vonage Cloud Runtime (VCR).
+A full-stack monorepo with ReactJS frontend and ExpressJS backend, designed for deployment on Vonage Cloud Runtime (VCR) including [Vonage Identity Insights API](https://developer.vonage.com/en/identity-insights/overview?source=identity-insights)
 
 ## Overview
 

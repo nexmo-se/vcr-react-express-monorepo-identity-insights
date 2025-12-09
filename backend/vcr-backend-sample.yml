@@ -1,5 +1,5 @@
 project:
-  name: vcr-react-express-monorepo-template-backend
+  name: vcr-react-express-monorepo-identity-insights-backend
 instance:
   name: backend
   runtime: nodejs22

@@ -1,5 +1,5 @@
 project:
-  name: vcr-react-express-monorepo-advanced-insights-frontend
+  name: vcr-react-express-monorepo-identity-insights-frontend
 instance:
   name: frontend
   runtime: nodejs22

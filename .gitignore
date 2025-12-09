@@ -140,3 +140,6 @@ dist
 .pnp.*
 backend/vcr.yml
 frontend/vcr.yml
+backend/vcr-backend.yml
+frontend/vcr-frontend.yml
+IMPLEMENTATION_SUMMARY.md

@@ -120,7 +120,28 @@ app.get("/api/test", (req, res) => {
 app.post("/api/identity/phone-match", async (req, res) => {
   console.log("Phone Match endpoint hit with body:", req.body);
   try {
-    const { phoneNumber, email, name } = req.body;
+    const {
+      phoneNumber,
+      email,
+      name,
+      simSwapPeriod,
+      // Location verification fields
+      latitude,
+      longitude,
+      radius,
+      // Subscriber match fields
+      idDocument,
+      givenName,
+      familyName,
+      streetName,
+      streetNumber,
+      postalCode,
+      locality,
+      region,
+      country,
+      houseNumberExtension,
+      birthdate,
+    } = req.body;
 
     if (!phoneNumber) {
       return res.status(400).json({
@@ -176,18 +197,67 @@ app.post("/api/identity/phone-match", async (req, res) => {
     // Build insights request based on provided parameters
     const insightsRequest = {
       format: {},
-      sim_swap: { period: 240 },
+      sim_swap: {
+        period: simSwapPeriod ? parseInt(simSwapPeriod) : 240,
+      },
       current_carrier: {},
       original_carrier: {},
       roaming: {},
       reachability: {},
     };
 
-    // Add subscriber_match if email or name provided
-    if (email || name) {
+    // Add location_verification if coordinates provided
+    if (latitude !== undefined && longitude !== undefined && radius) {
+      insightsRequest.location_verification = {
+        location: {
+          type: "CIRCLE",
+          radius: parseInt(radius),
+          center: {
+            latitude: parseFloat(latitude),
+            longitude: parseFloat(longitude),
+          },
+        },
+      };
+    }
+
+    // Add subscriber_match if any subscriber data provided
+    const hasSubscriberData =
+      email ||
+      name ||
+      idDocument ||
+      givenName ||
+      familyName ||
+      streetName ||
+      streetNumber ||
+      postalCode ||
+      locality ||
+      region ||
+      country ||
+      houseNumberExtension ||
+      birthdate;
+
+    if (hasSubscriberData) {
       insightsRequest.subscriber_match = {};
-      if (email) insightsRequest.subscriber_match.email = email;
-      if (name) {
+
+      // Add all provided subscriber match fields
+      if (idDocument) insightsRequest.subscriber_match.id_document = idDocument;
+      if (givenName) insightsRequest.subscriber_match.given_name = givenName;
+      if (familyName) insightsRequest.subscriber_match.family_name = familyName;
+      if (streetName) insightsRequest.subscriber_match.street_name = streetName;
+      if (streetNumber)
+        insightsRequest.subscriber_match.street_number = streetNumber;
+      if (postalCode) insightsRequest.subscriber_match.postal_code = postalCode;
+      if (locality) insightsRequest.subscriber_match.locality = locality;
+      if (region) insightsRequest.subscriber_match.region = region;
+      if (country) insightsRequest.subscriber_match.country = country;
+      if (houseNumberExtension)
+        insightsRequest.subscriber_match.house_number_extension =
+          houseNumberExtension;
+      if (birthdate) insightsRequest.subscriber_match.birthdate = birthdate;
+
+      // Legacy support: if only email or name provided (without detailed fields)
+      if (email && !givenName) insightsRequest.subscriber_match.email = email;
+      if (name && !givenName && !familyName) {
         // Split name into given_name and family_name
         const nameParts = name.trim().split(/\s+/);
         if (nameParts.length > 1) {
@@ -235,6 +305,7 @@ app.post("/api/identity/phone-match", async (req, res) => {
     const subscriberMatchInsight = insights.subscriber_match || {};
     const roamingInsight = insights.roaming || {};
     const reachabilityInsight = insights.reachability || {};
+    const locationVerificationInsight = insights.location_verification || {};
 
     // Calculate match score based on available data
     let matchScore = 50; // Base score
@@ -293,6 +364,15 @@ app.post("/api/identity/phone-match", async (req, res) => {
           connectivity: reachabilityInsight.connectivity,
           status: reachabilityInsight.status,
         },
+        ...(locationVerificationInsight &&
+          Object.keys(locationVerificationInsight).length > 0 && {
+            locationVerification: {
+              isVerified: locationVerificationInsight.is_verified,
+              latestLocationAt: locationVerificationInsight.latest_location_at,
+              matchRate: locationVerificationInsight.match_rate,
+              status: locationVerificationInsight.status,
+            },
+          }),
         ...(subscriberMatchInsight &&
           Object.keys(subscriberMatchInsight).length > 0 && {
             subscriberMatch: subscriberMatchInsight,

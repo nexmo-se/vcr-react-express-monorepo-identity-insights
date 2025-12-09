@@ -6,16 +6,23 @@ A full-stack monorepo demonstrating the [Vonage Identity Insights API](https://d
 
 This demo application showcases the Vonage Identity Insights API, which provides real-time intelligence about phone numbers through multiple insights in a single API call:
 
-### Available Insights
+### Available Insights (All 8 Supported)
+
+This demo provides complete coverage of all Identity Insights API features:
+
+#### Core Insights (Beta Features)
 
 1. **Format Validation** - Validates phone number format and provides country information, time zones, and international/national formatting
-2. **SIM Swap Detection** - Checks if a SIM card has been swapped within a specified time period (helps detect potential account takeover)
-3. **Current Carrier** - Returns information about the network the number is currently assigned to (mobile only)
-4. **Original Carrier** - Returns information about the network the number was initially assigned to based on the numbering plan
-5. **Roaming Status** - Checks if the device is roaming and in which countries
+2. **SIM Swap Detection** - Checks if a SIM card has been swapped within a configurable time period (1-2400 hours, default 240). Helps detect potential account takeover attempts
+3. **Current Carrier** - Returns real-time information about the network the number is currently assigned to (mobile only)
+4. **Original Carrier** - Returns information about the network the number was initially assigned to based on the numbering plan prefix
+
+#### Advanced Insights (Developer Preview Features)
+
+5. **Roaming Status** - Checks if the device is roaming and identifies the countries where roaming is occurring
 6. **Reachability** - Verifies device connectivity status (connected for DATA and/or SMS)
-7. **Location Verification** - Verifies if a device is within a specified geographical area (Developer Preview)
-8. **Subscriber Match** - Compares user information against operator KYC records (Developer Preview)
+7. **Location Verification** - Verifies if a device is within a specified geographical area using circle-based location matching (radius: 2-200km)
+8. **Subscriber Match** - Compares user-provided information (ID document, name, address, birthdate) against operator KYC records with 11 matchable fields
 
 The monorepo contains two separate applications:
 
@@ -102,37 +109,54 @@ Note the deployed backend URL.
 
 ## Features
 
-### Phone Match
+### Identity Insights - Phone Match
 
-Test phone number verification with optional email and name matching:
+Comprehensive phone number verification with all 8 available insights:
+
+#### Basic Fields (Always Requested)
 
 - **Phone Number** (required): Enter with country code (e.g., +12089908002)
-- **Email** (optional): Email address to match against phone number
-- **Name** (optional): Full name to match against phone number
+- **Email** (optional): Email address for basic matching
+- **Name** (optional): Full name for basic matching
+- **SIM Swap Period** (optional): Hours to check for SIM swap (1-2400, default 240)
 
-**Returns:**
+#### Advanced Features (Expandable Sections)
 
-- Match score (0-100) based on available insights
-- Format validation (country, location, time zones)
-- SIM swap status (if authorized)
+**Location Verification (Developer Preview)**
+
+- Latitude (-90 to 90)
+- Longitude (-180 to 180)
+- Radius (2,000 to 200,000 meters)
+- Returns: TRUE/FALSE/UNKNOWN/PARTIAL verification status
+
+**Subscriber Match - Detailed KYC (Developer Preview)**
+
+- ID Document number
+- Given Name & Family Name
+- Complete address fields (street, number, postal code, locality, region, country)
+- House number extension (apartment/suite)
+- Birthdate (YYYY-MM-DD)
+- Returns: Match levels (EXACT, HIGH, PARTIAL, LOW, NONE, DATA_UNAVAILABLE)
+
+#### Response Data
+
+All requests return comprehensive insights:
+
+- Match score (0-100) based on available data points
+- Format validation with country, location, and time zone details
+- SIM swap detection within specified period
 - Current and original carrier information
-- Roaming status (if authorized)
-- Reachability status (if authorized)
+- Roaming status and country codes
+- Reachability and connectivity status (DATA/SMS)
+- Location verification results (if requested)
+- Subscriber match results for each KYC field (if requested)
 
-### Number Verify
+### Number Insight API (Legacy)
 
-Get comprehensive information about any phone number:
+Basic number verification using the older Number Insight Standard API:
 
 - **Phone Number** (required): Enter with country code
-
-**Returns:**
-
-- Format validation and international/national formatting
-- Country and regional information
-- Carrier/network details (current and original)
-- Network type (mobile, landline, etc.)
-- Time zone information
-- Reachability and connectivity status
+- Returns: Basic carrier information, validity status, and country details
 
 ## API Endpoints
 
@@ -206,6 +230,30 @@ Verify phone number details.
 ```
 
 ## Identity Insights API Details
+
+### Supported Request Parameters
+
+This demo supports **100% of the Identity Insights API parameters**:
+
+#### Required Parameters
+
+- `phone_number` - Phone number to verify (E.164 format recommended)
+- `insights` - At least one insight must be requested
+
+#### Optional Parameters
+
+- `purpose` - Set to "FraudPreventionAndDetection" (required for Network Registry insights)
+
+#### Insight Configuration
+
+- **format** - Empty object `{}`
+- **sim_swap** - `period` (1-2400 hours, configurable via UI)
+- **current_carrier** - Empty object `{}`
+- **original_carrier** - Empty object `{}`
+- **roaming** - Empty object `{}`
+- **reachability** - Empty object `{}`
+- **location_verification** - `type`, `radius`, `center.latitude`, `center.longitude`
+- **subscriber_match** - Up to 11 KYC fields (id_document, names, address, birthdate)
 
 ### Authentication
 
@@ -304,9 +352,25 @@ Use Vonage Long Virtual Numbers (LVN) for testing:
 
 ## Resources
 
-- [Vonage Identity Insights API Documentation](https://developer.vonage.com/en/api/identity-insights)
-- [VCR Documentation](https://developer.vonage.com/en/vcr)
-- [Vonage Dashboard](https://dashboard.nexmo.com/)
+### Vonage Identity Insights Documentation
+
+- **[API Reference](https://developer.vonage.com/en/api/identity-insights)** - Complete API specification with request/response schemas and examples
+- **[Overview](https://developer.vonage.com/en/identity-insights/overview)** - Introduction to Identity Insights features and capabilities
+- **[Use Cases Guide](https://developer.vonage.com/en/identity-insights/use-cases-guide)** - Real-world implementation examples and best practices
+
+### Additional Resources
+
+- [VCR Documentation](https://developer.vonage.com/en/vcr) - Vonage Cloud Runtime setup and deployment guide
+- [Vonage Dashboard](https://dashboard.nexmo.com/) - Create applications and manage credentials
+- [JWT Authentication Guide](https://developer.vonage.com/en/getting-started/concepts/authentication#json-web-tokens-jwt) - Understanding JWT tokens for API authentication
+
+## Support
+
+For issues or questions:
+
+- Check the [API Reference](https://developer.vonage.com/en/api/identity-insights) for detailed parameter information
+- Review the [Use Cases Guide](https://developer.vonage.com/en/identity-insights/use-cases-guide) for implementation patterns
+- Visit [Vonage Developer Portal](https://developer.vonage.com/) for comprehensive documentation
 
 ## License
 

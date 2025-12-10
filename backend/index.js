@@ -255,6 +255,21 @@ app.post("/api/identity/phone-match", async (req, res) => {
           houseNumberExtension;
       if (birthdate) insightsRequest.subscriber_match.birthdate = birthdate;
 
+      // Add combined fields if individual components are provided
+      // Combined name field (as shown in API docs)
+      if (givenName && familyName) {
+        insightsRequest.subscriber_match.name = `${givenName} ${familyName}`;
+      } else if (name && !givenName && !familyName) {
+        insightsRequest.subscriber_match.name = name;
+      }
+
+      // Combined address field (as shown in API docs)
+      if (streetNumber && streetName) {
+        let addressParts = [streetNumber, streetName];
+        if (houseNumberExtension) addressParts.push(houseNumberExtension);
+        insightsRequest.subscriber_match.address = addressParts.join(" ");
+      }
+
       // Legacy support: if only email or name provided (without detailed fields)
       if (email && !givenName) insightsRequest.subscriber_match.email = email;
       if (name && !givenName && !familyName) {

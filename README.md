@@ -101,6 +101,7 @@ Once both backend and frontend are running locally, follow these steps to demons
 3. Click **"Get Identity Insights"**
 
 **Expected Results:**
+
 - ✅ Format validation shows US/Idaho location
 - ✅ Original carrier identified (Verizon Wireless)
 - ⚠️ SIM swap/Roaming/Reachability show UNAUTHORIZED (requires Network Application)
@@ -165,6 +166,7 @@ Once both backend and frontend are running locally, follow these steps to demons
 ### Demo Scenarios
 
 #### Scenario 1: Fraud Prevention
+
 **Use Case:** Detect potential account takeover during login
 
 1. Enter user's phone number
@@ -173,6 +175,7 @@ Once both backend and frontend are running locally, follow these steps to demons
 4. **Action:** If swapped recently, trigger additional verification
 
 #### Scenario 2: Identity Verification
+
 **Use Case:** Verify user identity during registration
 
 1. Enter phone number, email, and full name
@@ -181,6 +184,7 @@ Once both backend and frontend are running locally, follow these steps to demons
 4. **Action:** Use match scores to determine if identity is verified
 
 #### Scenario 3: Location-Based Security
+
 **Use Case:** Verify user is in expected location
 
 1. Enter phone number
@@ -191,6 +195,7 @@ Once both backend and frontend are running locally, follow these steps to demons
 ### Response Indicators
 
 The UI shows responses with color coding:
+
 - 🟢 **Green background**: Successful API response
 - 🔴 **Red background**: Error occurred
 - **Recent Responses**: Last 2 responses shown expanded
@@ -199,6 +204,7 @@ The UI shows responses with color coding:
 ### Testing Different Phone Numbers
 
 Try various number formats to test format validation:
+
 - **US**: `+12089908002` or `12089908002`
 - **UK**: `+447700900123`
 - **International**: Include country code for accurate results
@@ -275,6 +281,36 @@ Basic number verification using the older Number Insight Standard API:
 
 - **Phone Number** (required): Enter with country code
 - Returns: Basic carrier information, validity status, and country details
+
+## Phone Number Validity
+
+The Identity Insights API provides several ways to assess the validity of a phone number:
+
+### 1. Format Validity
+
+- Checks if the number is globally assignable and compliant with international standards.
+- Use the `format.is_format_valid` field in the response.
+- A valid format is necessary, but not sufficient, for reachability.
+
+### 2. Carrier Assigned Validity
+
+- Checks if the number is currently assigned to a carrier.
+- Use `current_carrier.network_type` (should be `mobile`) and `original_carrier` for non-mobile numbers.
+- If these fields are populated, the number is assigned to a carrier, but may not be assigned to a subscriber.
+
+### 3. Reachability
+
+- Checks if the number is currently reachable via voice, SMS, or data.
+- Use the `reachability` insight for real-time connectivity status.
+- Even if a number is valid and assigned, it may not be reachable (e.g., device off or out of service).
+
+**Recommended approach:**
+
+1. Validate format with `format.is_format_valid`.
+2. Check carrier assignment with `current_carrier.network_type`.
+3. Optionally, check real-time reachability with the `reachability` insight.
+
+See the [Phone Number Validity Guide](https://developer.vonage.com/en/identity-insights/guides/phone-number-validity) for more details.
 
 ## API Endpoints
 
@@ -360,7 +396,7 @@ This demo supports **100% of the Identity Insights API parameters**:
 
 #### Optional Parameters
 
-- `purpose` - Set to "FraudPreventionAndDetection" (required for Network Registry insights)
+- `purpose` - Set to "FraudPreventionAndDetection" (required for Network Registry insights: SIM Swap, Roaming, Reachability, Location Verification, Subscriber Match)
 
 #### Insight Configuration
 
@@ -464,9 +500,19 @@ Use Vonage Long Virtual Numbers (LVN) for testing:
 
 ### Vonage Identity Insights Documentation
 
-- **[API Reference](https://developer.vonage.com/en/api/identity-insights)** - Complete API specification with request/response schemas and examples
-- **[Overview](https://developer.vonage.com/en/identity-insights/overview)** - Introduction to Identity Insights features and capabilities
-- **[Use Cases Guide](https://developer.vonage.com/en/identity-insights/use-cases-guide)** - Real-world implementation examples and best practices
+- **[API Reference](https://developer.vonage.com/en/api/identity-insights)**
+- **[Overview](https://developer.vonage.com/en/identity-insights/overview)**
+- **[Use Cases Guide](https://developer.vonage.com/en/identity-insights/use-cases-guide)**
+- **[Using Multiple Insights](https://developer.vonage.com/en/identity-insights/guides/using-multiple-insights)**
+- **[Format Insight Guide](https://developer.vonage.com/en/identity-insights/guides/format)**
+- **[Original Carrier Insight Guide](https://developer.vonage.com/en/identity-insights/guides/original-carrier)**
+- **[Current Carrier Insight Guide](https://developer.vonage.com/en/identity-insights/guides/current-carrier)**
+- **[SIM Swap Insight Guide](https://developer.vonage.com/en/identity-insights/guides/sim-swap)**
+- **[Subscriber Match Insight Guide](https://developer.vonage.com/en/identity-insights/guides/subscriber-match)**
+- **[Location Verification Insight Guide](https://developer.vonage.com/en/identity-insights/guides/location-verification)**
+- **[Roaming Insight Guide](https://developer.vonage.com/en/identity-insights/guides/roaming)**
+- **[Reachability Insight Guide](https://developer.vonage.com/en/identity-insights/guides/reachability)**
+- **[Phone Number Validity Guide](https://developer.vonage.com/en/identity-insights/guides/phone-number-validity)**
 
 ### Additional Resources
 

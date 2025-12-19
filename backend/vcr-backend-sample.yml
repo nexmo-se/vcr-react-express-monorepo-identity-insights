@@ -7,7 +7,7 @@ instance:
   application-id: XXXX
   environment:
     - name: FRONTEND_URL
-      value: "YOUR_FRONTEND_URL_HERE"
+      value: "http://localhost:3002" # For local dev. Change to your deployed frontend URL for production
   entrypoint:
     - node
     - index.js

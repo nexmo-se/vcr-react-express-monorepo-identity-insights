@@ -54,16 +54,45 @@ Each application has its own `vcr.yml` configuration file and must be run and de
    ```
 
 3. **Configure VCR files** using the provided samples as reference:
-   - Copy `vcr-frontend-sample.yml` to `vcr-frontend.yml` in the frontend directory
-   - Copy `vcr-backend-sample.yml` to `vcr-backend.yml` in the backend directory
-   - Update the `application-id` in both files with your VCR Application ID
-   - VCR automatically provides these environment variables when running:
-     - `API_ACCOUNT_ID` - Your Vonage API Key
-     - `API_ACCOUNT_SECRET` - Your Vonage API Secret
-     - `VCR_API_APPLICATION_ID` - Your Application ID
-     - `PRIVATE_KEY` - Your application private key for JWT generation
+
+   **Backend Configuration:**
+
+   ```bash
+   cd backend
+   cp vcr-backend-sample.yml vcr-backend.yml
+   ```
+
+   - Update `application-id` with your VCR Application ID
+   - For local development, set `FRONTEND_URL` to `http://localhost:3002`
+   - For production deployment, you'll update `FRONTEND_URL` after deploying the frontend (see Deployment section)
+
+   **Frontend Configuration:**
+
+   ```bash
+   cd frontend
+   cp vcr-frontend-sample.yml vcr.yml
+   ```
+
+   - Update `application-id` with your VCR Application ID
+   - No additional configuration needed for local development
+
+   **Auto-Provided Environment Variables:**
+   VCR automatically provides these when running `vcr debug` or `vcr deploy`:
+
+   - `API_ACCOUNT_ID` - Your Vonage API Key
+   - `API_ACCOUNT_SECRET` - Your Vonage API Secret
+   - `VCR_API_APPLICATION_ID` - Your Application ID
+   - `PRIVATE_KEY` - Your application private key for JWT generation
 
 ## Local Development
+
+### Port Configuration
+
+- **Backend**: Runs on port `3000` (VCR default)
+- **Frontend**: Runs on port `3002` (configured in `package.json`)
+- **CORS**: Backend accepts requests from `http://localhost:3002` in local development
+
+### Running the Applications
 
 Run both applications in separate terminal windows:
 
@@ -71,10 +100,11 @@ Run both applications in separate terminal windows:
 
 ```bash
 cd backend
+# Make sure FRONTEND_URL is set to http://localhost:3002 in vcr-backend.yml
 vcr debug -y -f ./vcr-backend.yml
 ```
 
-The backend will run on `http://localhost:3000`
+The backend API will be available at `http://localhost:3000`
 
 **Terminal 2 - Frontend:**
 
@@ -83,7 +113,7 @@ cd frontend
 npm start
 ```
 
-The frontend will run on `http://localhost:3002`
+The frontend UI will be available at `http://localhost:3002` and will automatically connect to the backend at `http://localhost:3000`
 
 ## Demo Instructions
 
@@ -211,25 +241,60 @@ Try various number formats to test format validation:
 
 ## Deployment
 
-### 1. Deploy Backend
+### Deployment Process
+
+Deployment requires a two-step process due to the circular dependency between frontend and backend URLs:
+
+### Step 1: Initial Backend Deployment
 
 ```bash
 cd backend
+# Deploy with temporary FRONTEND_URL (will update in Step 3)
 vcr deploy -f ./vcr-backend.yml
 ```
 
-Note the deployed backend URL.
+**Save the deployed backend URL** (e.g., `https://your-app-backend.use1.runtime.vonage.cloud`)
 
-### 2. Deploy Frontend
+### Step 2: Deploy Frontend with Backend URL
 
-1. Update `BACKEND_URL` in `/frontend/src/App.js` with your deployed backend URL
-2. Update `FRONTEND_URL` in `/backend/vcr-backend.yml` with your frontend URL (you may need to deploy twice to get the URL)
-3. Deploy:
+1. Update `BACKEND_URL` in `/frontend/src/App.js`:
+
+   ```javascript
+   const BACKEND_URL =
+     process.env.NODE_ENV === "production"
+       ? "https://your-app-backend.use1.runtime.vonage.cloud" // Your backend URL from Step 1
+       : "http://localhost:3000";
+   ```
+
+2. Deploy the frontend:
 
    ```bash
    cd frontend
-   vcr deploy -f ./vcr-frontend.yml
+   vcr deploy -f ./vcr.yml
    ```
+
+**Save the deployed frontend URL** (e.g., `https://your-app-frontend.use1.runtime.vonage.cloud`)
+
+### Step 3: Update Backend with Frontend URL
+
+1. Update `FRONTEND_URL` in `/backend/vcr-backend.yml`:
+
+   ```yaml
+   environment:
+     - name: FRONTEND_URL
+       value: "https://your-app-frontend.use1.runtime.vonage.cloud" # Your frontend URL from Step 2
+   ```
+
+2. Redeploy the backend:
+
+   ```bash
+   cd backend
+   vcr deploy -f ./vcr-backend.yml
+   ```
+
+### Deployment Complete
+
+Your application is now fully deployed with proper CORS configuration. Access the frontend at your deployed URL.
 
 ## Features
 

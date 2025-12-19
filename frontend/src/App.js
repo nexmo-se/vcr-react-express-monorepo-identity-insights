@@ -22,9 +22,8 @@ import PersonIcon from "@mui/icons-material/Person";
 import "./App.css";
 
 const BACKEND_URL =
-  process.env.NODE_ENV === "production"
-    ? "https://neru-4f2ff535-epic-call-app-backend-dev.use1.runtime.vonage.cloud"
-    : "http://localhost:3000";
+  "https://neru-4f2ff535-vcr-react-express-monorepo-adv-backend.use1.runtime.vonage.cloud" ||
+  "http://localhost:3000";
 
 function App() {
   const [responses, setResponses] = useState([]);
